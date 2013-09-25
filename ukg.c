@@ -51,13 +51,14 @@ typedef struct {
 
     int worker_id;
     int datacenter_id;
-
     long sequence;
     long long last_timestamp;
     long long twepoch;
+
     unsigned char worker_id_bits;
     unsigned char datacenter_id_bits;
     unsigned char sequence_bits;
+
     int worker_id_shift;
     int datacenter_id_shift;
     int timestamp_left_shift;
@@ -71,15 +72,20 @@ typedef struct {
     char sndbuf[32];
     char *sndptr;
     char *sndend;
+    void *next;
 } ukg_connection_t;
 
 
 #define UKG_GENERATE_UKEY  1
 #define UKG_SENDTO_CLIENT  2
 
+#define UKG_MAX_FREE_CONNECTIONS 1000
+
 
 static ukg_context_t  g_context;
 static ukg_context_t *g_ctx = &g_context;
+static ukg_connection_t *g_free_connections = NULL;
+static int g_free_connections_count = 0;
 
 
 int ukg_set_nonblocking(int fd)
@@ -110,6 +116,34 @@ void ukg_daemonize(void)
 }
 
 
+ukg_connection_t *ukg_get_connection()
+{
+    ukg_connection_t *conn;
+
+    if (g_free_connections_count > 0) {
+        conn = g_free_connections;
+        g_free_connections = conn->next;
+        g_free_connections_count--;
+    } else {
+        conn = (ukg_connection_t *)malloc(sizeof(*conn));
+    }
+
+    return conn;
+}
+
+
+void ukg_free_connection(ukg_connection_t *conn)
+{
+    if (g_free_connections_count < UKG_MAX_FREE_CONNECTIONS) {
+        conn->next = g_free_connections;
+        g_free_connections = conn;
+        g_free_connections_count++;
+    } else {
+        free(conn);
+    }
+}
+
+
 static long long ukg_really_time()
 {
     struct timeval tv;
@@ -126,7 +160,7 @@ static long long ukg_really_time()
 }
 
 
-long long ukg_generator_nextID(ukg_context_t *ctx)
+long long ukg_next_id(ukg_context_t *ctx)
 {
     long long timestamp = ukg_really_time();
 
@@ -163,7 +197,7 @@ void ukg_sendto_callback(aeEventLoop *ev, int fd, void *data, int mask)
     {
     case UKG_GENERATE_UKEY:
 
-        unique_id = ukg_generator_nextID(g_ctx);
+        unique_id = ukg_next_id(g_ctx);
         if (unique_id == -1LL) { /* wati until return not equals -1 */
             break;
         }
@@ -185,7 +219,7 @@ void ukg_sendto_callback(aeEventLoop *ev, int fd, void *data, int mask)
         if (ssize <= 0 || ssize == wsize) {
             aeDeleteFileEvent(g_ctx->evloop, conn->sock, AE_WRITABLE);
             close(conn->sock);
-            free(conn);
+            ukg_free_connection(conn);
             break;
         }
 
@@ -215,8 +249,8 @@ void ukg_accept_callback(aeEventLoop *ev, int fd, void *data, int mask)
         return;
     }
 
-    conn = malloc(sizeof(ukg_connection_t));
-    if (!conn) {
+    conn = ukg_get_connection();
+    if (conn == NULL) {
         close(sock);
         return;
     }
@@ -327,7 +361,7 @@ void ukg_default_setting()
 
 void ukg_usage()
 {
-    printf("Unique Key Generator Server.\n\n"
+    printf("Unique Key Generate Server.\n\n"
            "Usage: ukg [options]\n"
            "Options:\n"
            "    -w, --worker        worker ID\n"
@@ -386,11 +420,8 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    /* main loop */
-    ukg_server_loop();
-
-    /* shutdown server */
-    ukg_server_shutdown();
+    ukg_server_loop();     /* start main loop */
+    ukg_server_shutdown(); /* shutdown server */
 
     return 0;
 }
