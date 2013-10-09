@@ -124,6 +124,7 @@ ukg_connection_t *ukg_get_connection()
         conn = g_free_connections;
         g_free_connections = conn->next;
         g_free_connections_count--;
+
     } else {
         conn = (ukg_connection_t *)malloc(sizeof(*conn));
     }
@@ -138,6 +139,7 @@ void ukg_free_connection(ukg_connection_t *conn)
         conn->next = g_free_connections;
         g_free_connections = conn;
         g_free_connections_count++;
+
     } else {
         free(conn);
     }
@@ -153,8 +155,7 @@ static long long ukg_really_time()
         return 0LL;
     }
 
-    retval = (long long)tv.tv_sec * 1000ULL + 
-             (long long)tv.tv_usec / 1000ULL;
+    retval = (long long)tv.tv_sec * 1000ULL + (long long)tv.tv_usec / 1000ULL;
 
     return retval;
 }

@@ -12,7 +12,7 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author:                                                              |
+  | Author:  Liexusong <280259971@qq.com>                                |
   +----------------------------------------------------------------------+
 */
 
@@ -27,6 +27,8 @@
 #include "ext/standard/info.h"
 #include "php_ukg.h"
 
+#define UKG_EXT_VERSION "0.1"
+
 /* If you declare any globals in php_ukg.h uncomment this:
 ZEND_DECLARE_MODULE_GLOBALS(ukg)
 */
@@ -40,8 +42,8 @@ static int le_ukg;
  */
 zend_function_entry ukg_functions[] = {
     PHP_FE(ukg_getkey,    NULL)
-	PHP_FE(ukg_key2info,  NULL)
-	{NULL, NULL, NULL}	/* Must be the last line in ukg_functions[] */
+    PHP_FE(ukg_key2info,  NULL)
+    {NULL, NULL, NULL}    /* Must be the last line in ukg_functions[] */
 };
 /* }}} */
 
@@ -49,19 +51,19 @@ zend_function_entry ukg_functions[] = {
  */
 zend_module_entry ukg_module_entry = {
 #if ZEND_MODULE_API_NO >= 20010901
-	STANDARD_MODULE_HEADER,
+    STANDARD_MODULE_HEADER,
 #endif
-	"ukg",
-	ukg_functions,
-	PHP_MINIT(ukg),
-	PHP_MSHUTDOWN(ukg),
-	NULL,
-	NULL,
-	PHP_MINFO(ukg),
+    "ukg",
+    ukg_functions,
+    PHP_MINIT(ukg),
+    PHP_MSHUTDOWN(ukg),
+    NULL,
+    NULL,
+    PHP_MINFO(ukg),
 #if ZEND_MODULE_API_NO >= 20010901
-	"0.1", /* Replace with version number for your extension */
+    UKG_EXT_VERSION, /* Replace with version number for your extension */
 #endif
-	STANDARD_MODULE_PROPERTIES
+    STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
 
@@ -74,10 +76,10 @@ ZEND_GET_MODULE(ukg)
  */
 PHP_MINIT_FUNCTION(ukg)
 {
-	/* If you have INI entries, uncomment these lines 
-	REGISTER_INI_ENTRIES();
-	*/
-	return SUCCESS;
+    /* If you have INI entries, uncomment these lines 
+    REGISTER_INI_ENTRIES();
+    */
+    return SUCCESS;
 }
 /* }}} */
 
@@ -85,10 +87,10 @@ PHP_MINIT_FUNCTION(ukg)
  */
 PHP_MSHUTDOWN_FUNCTION(ukg)
 {
-	/* uncomment this line if you have INI entries
-	UNREGISTER_INI_ENTRIES();
-	*/
-	return SUCCESS;
+    /* uncomment this line if you have INI entries
+    UNREGISTER_INI_ENTRIES();
+    */
+    return SUCCESS;
 }
 /* }}} */
 
@@ -97,7 +99,7 @@ PHP_MSHUTDOWN_FUNCTION(ukg)
  */
 PHP_RINIT_FUNCTION(ukg)
 {
-	return SUCCESS;
+    return SUCCESS;
 }
 /* }}} */
 
@@ -106,7 +108,7 @@ PHP_RINIT_FUNCTION(ukg)
  */
 PHP_RSHUTDOWN_FUNCTION(ukg)
 {
-	return SUCCESS;
+    return SUCCESS;
 }
 /* }}} */
 
@@ -114,13 +116,11 @@ PHP_RSHUTDOWN_FUNCTION(ukg)
  */
 PHP_MINFO_FUNCTION(ukg)
 {
-	php_info_print_table_start();
-	php_info_print_table_header(2, "ukg support", "enabled");
-	php_info_print_table_end();
-
-	/* Remove comments if you have entries in php.ini
-	DISPLAY_INI_ENTRIES();
-	*/
+    php_info_print_table_start();
+    php_info_print_table_header(2, "ukg support", "enabled");
+    php_info_print_table_row(2, "author", "Liexusong");
+    php_info_print_table_row(2, "version", UKG_EXT_VERSION);
+    php_info_print_table_end();
 }
 /* }}} */
 
