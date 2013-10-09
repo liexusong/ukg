@@ -1,0 +1,13 @@
+// $Id$
+// vim:ft=javascript
+
+// If your extension references something external, use ARG_WITH
+// ARG_WITH("ukg", "for ukg support", "no");
+
+// Otherwise, use ARG_ENABLE
+// ARG_ENABLE("ukg", "enable ukg support", "no");
+
+if (PHP_UKG != "no") {
+	EXTENSION("ukg", "ukg.c");
+}
+
