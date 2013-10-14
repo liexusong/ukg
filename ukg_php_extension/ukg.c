@@ -125,6 +125,8 @@ PHP_MINFO_FUNCTION(ukg)
 /* }}} */
 
 
+#define isspace(c)  ((c) == ' ' || (c) == '\n' || (c) == '\r' || (c) == '\t')
+
 PHP_FUNCTION(ukg_getkey)
 {
     php_stream *stream = NULL;
@@ -166,6 +168,8 @@ PHP_FUNCTION(ukg_getkey)
         php_stream_close(stream);
         RETURN_FALSE;
     }
+
+    while (recv_len > 0 && isspace(recv_key[recv_len-1])) recv_len--;
 
     php_stream_close(stream);
     RETURN_STRINGL(recv_key, recv_len, 0);
