@@ -12,7 +12,7 @@ $ ./ukg -D
 <pre>
 $ cd ukg_php_extension
 $ phpize
-$ configure
+$ ./configure
 $ make & make install
 </pre>
 
